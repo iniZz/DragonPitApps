@@ -12,12 +12,9 @@
 						<div id="artiststhumbnail">
 
 							<a href="NotByDesign">
-								{% if userInfo != null %}
-								<img src='https://cdn.discordapp.com/avatars/{{ userInfo.id }}/{{ userInfo.avatar }}.png' alt='{{ userInfo.username }}' />
-                                {% else %}
+								
 
 								<img src="/img/logo.png" style="width:20%"/>
-								{% endif %}
 
 							</a>
 						</div>
@@ -27,7 +24,7 @@
 					</div>
 					<div class='button'>
 						<button type="submit" style="border: 0; background: transparent">
-							<a href="/link/to/page2">
+							<a href="{{ path('app_oauth_discord') }}">
 								<img src="/img/play.png" alt="submit"/></a>
 						</button>
 					</div>

@@ -1,0 +1,18 @@
+{% block stylesheets %}
+	{{ encore_entry_link_tags('menu') }}
+{% endblock %}
+
+{% block javascripts %}
+	{{ encore_entry_script_tags('menu') }}
+	{# <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> #}
+{% endblock %}
+<header>
+	<nav class="page__menu menu">
+    <ul class="menu__list r-list">
+      <li class="menu__group"><a href="{{ path('index') }}" class="menu__link r-link text-underlined">Formularz</a></li>
+      <li class="menu__group"><a href="{{ path('index') }}" class="menu__link r-link text-underlined">Wrrsja Robocza</a></li>
+      <li class="menu__group"><a href="{{ path('myApplications') }}" class="menu__link r-link text-underlined">Moje Podania</a></li>
+      <li class="menu__group"><a href="{{ path('app_logout') }}" class=""><img src='https://cdn.discordapp.com/avatars/{{ me.id }}/{{ me.avatar }}.png' alt='{{ me.username }}' /></a></li>
+    </ul>
+  </nav>
+</header>

@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Lista podań{% endblock %}
+
+{% block body %}
+{% include "admin/inc/menu.html.twig" %}
+<div class="page">
+		<div class="container">
+			<div class="row">
+				<div class="box-a">
+				<div class="form" style="width: 100%;">
+					<table class="products-table">
+						<tr>
+							<th>
+								ID</th>
+							<th>
+								Pajac do sprawdzenia</th>
+							<th>
+								Akcja</th>
+						</tr>
+
+						{% for apps in pagination %}
+							<tr {% if apps.faster == true %}class="faster"{% else %}{% if loop.index is odd %} class="color" {% endif %}{% endif %}>
+								<td>{{ apps.id }}</td>
+								<td>{{ apps.discordId }}</td>
+								<td><a class="checkApps" href="{{ path('show_apps', { 'page':pagination.currentPageNumber,  'id': apps.id}) }}">PODANIE</a></td>
+								{# <td>
+									{% if apps.disabled %}
+										<a class="usDisabled" href="{{ path('user_enable', {'userID': users.id, 'pagination':pagination.currentPageNumber }) }}">DISABLED</a>
+									{% else %}
+										<a class="usEnabled" href="{{ path('user_disable', {'userID': users.id, 'pagination':pagination.currentPageNumber }) }}">ENABLED</a>
+									{% endif %}
+								</td> #}
+
+							</tr>
+						{% endfor %}
+					</table>
+					<div class="navigation">
+						{{ knp_pagination_render(pagination) }}
+					</div>
+				</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

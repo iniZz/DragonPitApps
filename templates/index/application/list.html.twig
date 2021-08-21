@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Podania!
+{% endblock %}
+
+{% block body %}
+	{% include "index/application/inc/menu.html.twig" %}
+	<div class='page' style="margin-top: 50px;">
+		<div class='containefr'>
+			<div class='row'>
+				<div class='box-a'>
+					<table class="products-table">
+							<tr>
+								<th>ID</th>
+								<th>Time</th>
+								<th>Status</th>
+							</tr>
+							{% for app in userinfo %}
+							<tr {% if loop.index is odd %} class="color" {% endif %}>
+								<td>{{ app.discordId }}</td>
+								<td>{{ app.birth_date|date('Y-m-d') }}</td>
+								{# <td>{% if app.status == 'wait' %} OCZEKUJĄCE {% else if app.status == "accepted" %} ZAAKCEPTOWANE {% else %} ODRZUCONE {% endif %}</td> #}
+								<td>{{ app.status }}</td>
+							</tr>
+						{% endfor %}
+					</table>
+				</div>
+			</div>
+		</div>
+	{% endblock %}

@@ -2,7 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\Questions;
+
+use App\Entity\Applications;
+use App\Form\ApplicationsType;
+
 use App\Service\Discord;
+use App\Service\ApplicationsService;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,6 +18,12 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+
 use Symfony\Component\HttpFoundation\Cookie;
 
 class IndexController extends AbstractController
@@ -19,15 +31,16 @@ class IndexController extends AbstractController
     private const DISCORD_ENDPOINT = 'https://discord.com/api/oauth2/authorize';
 
     private $discord;
+    private $applicationsService;
 
-    public function __construct(Discord $discord)
+    public function __construct(Discord $discord, ApplicationsService $applicationsService)
     {
         $this->discord = $discord;
+        $this->applicationsService = $applicationsService;
     }
 
     /**
-     * @Route("/", name="index",
-     * methods={"GET"})
+     * @Route("/", name="index")
      */
     public function index(Request $request): Response
     {
@@ -35,13 +48,45 @@ class IndexController extends AbstractController
         // dd($cookie);
         if ($cookie) {
             $userInfo = $this->discord->getUser($cookie);
+            $questions = $this->getDoctrine()
+            ->getRepository(Questions::class)
+            ->find(1);
+            $applications = new Applications();
+            $applications->setDiscordId($userInfo['username'].' ('.$userInfo['id'].')');
+            // $applications->setBirthDate(date("yyyy-MM-dd"));
+            
+            $form = $this->createFormBuilder($applications, array('attr' => array('class' => 'input-container')))
+            ->setAttribute('class', 'input-container')
+            ->add('discordId', TextType::class, ['label' => $questions->getDiscordId(),'disabled' => true])
+            ->add('steamHex', TextType::class, ['label' => $questions->getSteamHex()])
+            ->add('birth_date', DateType::class, ['widget' => 'single_text','format' => 'yyyy-MM-dd', 'label' => $questions->getBirthDate()])
+            ->add('answ1', TextareaType::class, ['label' => $questions->getQue1()])
+            ->add('answ2', TextareaType::class, ['label' => $questions->getQue2()])
+            ->add('answ3', TextareaType::class, ['label' => $questions->getQue3()])
+            ->add('answ4', TextareaType::class, ['label' => $questions->getQue4()])
+            ->add('answ5', TextareaType::class, ['label' => $questions->getQue5()])
+            ->add('answ6', TextareaType::class, ['label' => $questions->getQue6()])
+            ->add('save', SubmitType::class, ['label' => 'Wyślij'])
+            ->add('add', SubmitType::class, ['label' => 'Wyślij'])
+            ->getForm();
+
+            $form->handleRequest($request);
+            if ($form->isSubmitted() && $form->isValid()) {
+                $applications->setStatus("wait");
+                $this->applicationsService->Insert($applications, $questions);
+            }
+
+            return $this->render('index/application/index.html.twig', [
+                'me' => $userInfo,
+                'form' => $form->createView(),
+            ]);
         } else {
             $userInfo = null;
+            return $this->render('index/index.html.twig', [
+                'me' => $userInfo,
+            ]);
         }
         // dd($cookie);
-        return $this->render('index/index.html.twig', [
-            'userInfo' => $userInfo,
-        ]);
     }
 
     /**
@@ -53,7 +98,7 @@ class IndexController extends AbstractController
         CsrfTokenManagerInterface $csrfTokenManager,
         UrlGeneratorInterface $urlGenerator
     ): RedirectResponse {
-        $redirectUrl = $urlGenerator->generate('app_login', [
+        $redirectUrl = $urlGenerator->generate('app_user_login', [
             'discord-oauth-provider' => true
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
@@ -70,36 +115,63 @@ class IndexController extends AbstractController
     }
 
     /**
-     * @Route("/login", name="app_login",
+     * @Route("/login", name="app_user_login",
      * methods={"GET"})
      */
     public function appLogin(Request $request, UrlGeneratorInterface $urlGenerator): Response
     {
         $code = $request->query->get('code');
-        // $state = $request->query->get('state');
         $user = $this->discord->loadDiscordUser($code);
 
-        // $this->getResponse()->setCookie('user', $user['access_token'], $user['expire']);
-    //     $response = new RedirectResponse($urlGenerator->generate('index'));
-    //     // dd($user['access_token']);
-    //     $cookie = Cookie::create('iniZAuth')
-    // ->withValue($user['access_token'])
-    // ->withExpires(time() + (0 * 3 * 5 * 35))
-    // ->withDomain('https://127.0.0.1')
-    // ->withSecure(true);
-    //     $response->headers->setCookie($cookie);
-    $response = new Response();
+        $response = new Response();
         $expires = time() + 36000;
-        $cookie = Cookie::create('iniZAuth', $user['access_token'],  $expires);
-        //$cookie = $response->headers->setCookie(Cookie::create('foo', 'bar'));
+        $cookie = Cookie::create('iniZAuth', $user['access_token'], $expires);
         $response->headers->setCookie($cookie);
 
-        // $content = "<html><body><h1>Learning symfony cookie creation techniques?</h1></body></html>";
-        // $response->setContent($content);
         $response->headers->set('Content-Type', 'text/html');
-        // return $response;
         $response->send();
         
         return $this->redirectToRoute('index');
+    }
+
+    /**
+     * @Route("/logout", name="app_logout",
+     * methods={"GET"})
+     */
+    public function appLogout(Request $request, UrlGeneratorInterface $urlGenerator): Response
+    {
+        $response = new Response();
+        $response->headers->clearCookie('iniZAuth');
+
+        $response->headers->set('Content-Type', 'text/html');
+        $response->send();
+        
+        return $this->redirectToRoute('index');
+    }
+
+
+    /**
+     * @Route("/applications", name="myApplications",
+     * methods={"GET"})
+     */
+    public function appShow(Request $request): Response
+    {
+        $cookie = $request->cookies->get('iniZAuth');
+        if ($cookie) {
+            $userInfo = $this->discord->getUser($cookie);
+            $discord =$userInfo['username'].' ('.$userInfo['id'].')'; 
+            $apps = $this->applicationsService->getMyApps($discord);
+                
+            // dd($apps);
+            return $this->render('index/application/list.html.twig', [
+            'userinfo' => $apps,
+            'me' => $userInfo,
+        ]);
+        } else {
+            $userInfo = null;
+            return $this->render('index/index.html.twig', [
+            'me' => $userInfo,
+        ]);
+        }
     }
 }

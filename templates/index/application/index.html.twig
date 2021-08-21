@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Podania!
+{% endblock %}
+
+{% block body %}
+	{% include "index/application/inc/menu.html.twig" %}
+	<div class='page' style="margin-top: 50px;">
+		<div class='containefr'>
+			<div class='row'>
+				<div class='box-a'>
+					<div class='form'>
+						{{ form(form) }}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	{% endblock %}

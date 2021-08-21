@@ -11,8 +11,10 @@ class Discord
     private const DISCORD_ACCESS_TOKEN_ENDPOINT = 'https://discord.com/api/oauth2/token';
     private const DISCORD_USER_DATA_ENDPOINT = 'https://discordapp.com/api/users/@me';
     private const DISCORD_GUILDS_DATA_ENDPOINT = 'https://discordapp.com/api/users/@me/guilds';
+    
     private $discordClientID;
     private $discordClientSecret;
+
     private UrlGeneratorInterface $urlGenerator;
     private HttpClientInterface $httpClient;
 
@@ -53,7 +55,7 @@ class Discord
 
     private function getAccesToken(string $code): array
     {
-        $redirectUrl = $this->urlGenerator->generate('app_login', [
+        $redirectUrl = $this->urlGenerator->generate('app_user_login', [
             'discord-oauth-provider' => true
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
