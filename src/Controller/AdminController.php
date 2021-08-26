@@ -35,17 +35,15 @@ class AdminController extends AbstractController
      */
     public function index(Request $request, int $page = 1): Response
     {
- 
+
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $cookie = $request->cookies->get('iniZAuth');
-        // dd($cookie);
         if ($cookie) {
-            
+
             $userInfo = $this->discord->getUser($cookie);
             $pagination = $this->adminService->pagginatrion($page);
-            $count =$this->adminService->getFasterCount();
-            // dd(count($count));
-        }else{
+            $count = $this->adminService->getFasterCount();
+        } else {
             $userInfo = null;
             return $this->render('index/index.html.twig', [
                 'me' => $userInfo,
@@ -56,6 +54,7 @@ class AdminController extends AbstractController
             'me' => $userInfo,
             'pagination' => $pagination,
             'count' => count($count),
+            'faster' => false,
         ]);
     }
 
@@ -64,40 +63,70 @@ class AdminController extends AbstractController
      */
     public function show(Request $request, int $page = 1, int $id): Response
     {
-        // dd();
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $cookie = $request->cookies->get('iniZAuth');
-        // dd($cookie);
         if ($cookie) {
-            
-            $userInfo = $this->discord->getUser($cookie);
-            
-            $count =$this->adminService->getFasterCount();
-            $application = $this->getDoctrine()
-            ->getRepository(Applications::class)
-            ->find($id);
 
-            $form = $this->createFormBuilder($application, array('attr' => array('class' => 'input-container')))
-            ->setAttribute('class', 'input-container')
-            ->add('discordId', TextType::class, ['label' => 'Discord ID','disabled' => true])
-            ->add('steamHex', TextType::class, ['label' => 'Steam hex'])
-            ->add('birth_date', DateType::class, ['widget' => 'single_text','format' => 'yyyy-MM-dd', 'label' => 'Data urodzenia','disabled' => true])
-            ->add('answ1', TextareaType::class, ['label' => $application->getQue1(),'disabled' => true])
-            ->add('answ2', TextareaType::class, ['label' => $application->getQue2(),'disabled' => true])
-            ->add('answ3', TextareaType::class, ['label' => $application->getQue3(),'disabled' => true])
-            ->add('answ4', TextareaType::class, ['label' => $application->getQue4(),'disabled' => true])
-            ->add('answ5', TextareaType::class, ['label' => $application->getQue5(),'disabled' => true])
-            ->add('answ6', TextareaType::class, ['label' => $application->getQue6(),'disabled' => true])
-            ->add('reason', TextareaType::class, [])
-            ->add('add', SubmitType::class, ['label' => 'Add'])
-            ->add('reject', SubmitType::class, ['label' => 'Reject', 'attr' => array( 'class' => 'btn_half')])
-            ->getForm();
+            $userInfo = $this->discord->getUser($cookie);
+
+            $count = $this->adminService->getFasterCount();
+            $application = $this->getDoctrine()
+                ->getRepository(Applications::class)
+                ->find($id);
+                
+                if ($application->getFaster()) {
+                    $form = $this->createFormBuilder($application, array('attr' => array('class' => 'input-container')))
+                ->setAttribute('class', 'input-container')
+                ->add('discordId', TextType::class, ['label' => 'Discord ID', 'disabled' => true])
+                ->add('steamHex', TextType::class, ['label' => 'Steam hex'])
+                ->add('birth_date', DateType::class, ['widget' => 'single_text', 'format' => 'yyyy-MM-dd', 'label' => 'Data urodzenia', 'disabled' => true])
+                ->add('answ1', TextareaType::class, ['label' => $application->getQue1(), 'disabled' => true])
+                ->add('answ2', TextareaType::class, ['label' => $application->getQue2(), 'disabled' => true])
+                ->add('answ3', TextareaType::class, ['label' => $application->getQue3(), 'disabled' => true])
+                ->add('answ4', TextareaType::class, ['label' => $application->getQue4(), 'disabled' => true])
+                ->add('answ5', TextareaType::class, ['label' => $application->getQue5(), 'disabled' => true])
+                ->add('answ6', TextareaType::class, ['label' => $application->getQue6(), 'disabled' => true])
+                ->add('reason', TextareaType::class, ['required' => true])
+                ->add('add', SubmitType::class, ['label' => 'Add'])
+                ->add('reject', SubmitType::class, ['label' => 'Reject', 'attr' => array('class' => 'btn_half')])
+                ->getForm();
+                }else {
+                    $application->setReason("...");
+                    
+                    $form = $this->createFormBuilder($application, array('attr' => array('class' => 'input-container')))
+                    ->setAttribute('class', 'input-container')
+                    ->add('discordId', TextType::class, ['label' => 'Discord ID', 'disabled' => true])
+                    ->add('steamHex', TextType::class, ['label' => 'Steam hex'])
+                    ->add('birth_date', DateType::class, ['widget' => 'single_text', 'format' => 'yyyy-MM-dd', 'label' => 'Data urodzenia', 'disabled' => true])
+                    ->add('answ1', TextareaType::class, ['label' => $application->getQue1(), 'disabled' => true])
+                    ->add('answ2', TextareaType::class, ['label' => $application->getQue2(), 'disabled' => true])
+                    ->add('answ3', TextareaType::class, ['label' => $application->getQue3(), 'disabled' => true])
+                    ->add('answ4', TextareaType::class, ['label' => $application->getQue4(), 'disabled' => true])
+                    ->add('answ5', TextareaType::class, ['label' => $application->getQue5(), 'disabled' => true])
+                    ->add('answ6', TextareaType::class, ['label' => $application->getQue6(), 'disabled' => true])
+                    ->add('reason', TextareaType::class, ['required' => false])
+                    ->add('add', SubmitType::class, ['label' => 'Add'])
+                    ->add('reject', SubmitType::class, ['label' => 'Reject', 'attr' => array('class' => 'btn_half')])
+                    ->getForm();
+                }
+            
+                
+                
+                
 
             $form->handleRequest($request);
             if ($form->isSubmitted() && $form->isValid()) {
-                $this->adminService->Edit($application);
+
+                // dd($application->setReason("123"));
+                if ($form->getClickedButton() && 'add' === $form->getClickedButton()->getName()) {
+                    $this->adminService->Accepted($application, $userInfo);
+                    return $this->redirectToRoute('admin', ['page' => $page]);
+                } elseif ($form->getClickedButton() && 'reject' === $form->getClickedButton()->getName()) {
+                    $this->adminService->Rejected($application, $userInfo);
+                    return $this->redirectToRoute('admin', ['page' => $page]);
+                }
             }
-        }else{
+        } else {
             $userInfo = null;
             return $this->render('index/index.html.twig', [
                 'me' => $userInfo,
@@ -108,7 +137,6 @@ class AdminController extends AbstractController
             'me' => $userInfo,
             'form' => $form->createView(),
             'count' => count($count),
-            // 'pagination' => $pagination,
         ]);
     }
     /**
@@ -118,33 +146,32 @@ class AdminController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $cookie = $request->cookies->get('iniZAuth');
-        // dd($cookie);
         if ($cookie) {
             $userInfo = $this->discord->getUser($cookie);
+            $count = $this->adminService->getFasterCount();
             $questions = $this->getDoctrine()
-            ->getRepository(Questions::class)
-            ->find(1);
+                ->getRepository(Questions::class)
+                ->find(1);
 
             $form = $this->createFormBuilder($questions, array('attr' => array('class' => 'input-container')))
-            ->setAttribute('class', 'input-container')
-            ->add('discordId', TextType::class, ['disabled' => true])
-            ->add('steam_hex', TextType::class, ['disabled' => true])
-            ->add('birth_date', TextType::class, ['disabled' => true])
-            ->add('que1', TextType::class, [])
-            ->add('que2', TextType::class, [])
-            ->add('que3', TextType::class, [])
-            ->add('que4', TextType::class, [])
-            ->add('que5', TextType::class, [])
-            ->add('que6', TextType::class, [])
-            
-            ->add('save', SubmitType::class, ['label' => 'Send'])
-            ->getForm();
+                ->setAttribute('class', 'input-container')
+                ->add('discordId', TextType::class, ['disabled' => true])
+                ->add('steam_hex', TextType::class, ['disabled' => true])
+                ->add('birth_date', TextType::class, ['disabled' => true])
+                ->add('que1', TextType::class, [])
+                ->add('que2', TextType::class, [])
+                ->add('que3', TextType::class, [])
+                ->add('que4', TextType::class, [])
+                ->add('que5', TextType::class, [])
+                ->add('que6', TextType::class, [])
+                ->add('save', SubmitType::class, ['label' => 'Send'])
+                ->getForm();
 
             $form->handleRequest($request);
             if ($form->isSubmitted() && $form->isValid()) {
                 $this->adminService->Edit($questions);
             }
-        }else{
+        } else {
             $userInfo = null;
             return $this->render('index/index.html.twig', [
                 'me' => $userInfo,
@@ -154,6 +181,34 @@ class AdminController extends AbstractController
             'controller_name' => 'AdminController',
             'me' => $userInfo,
             'form' => $form->createView(),
+            'count' => count($count),
+        ]);
+    }
+
+    /**
+     * @Route("/przyspieszona/{page}", name="przyspieszona")
+     */
+    public function przyspieszona(Request $request, int $page = 1): Response
+    {
+
+        $cookie = $request->cookies->get('iniZAuth');
+        if ($cookie) {
+
+            $userInfo = $this->discord->getUser($cookie);
+            $pagination = $this->adminService->pagginatrionFaster($page);
+            $count = $this->adminService->getFasterCount();
+        } else {
+            $userInfo = null;
+            return $this->render('index/index.html.twig', [
+                'me' => $userInfo,
+            ]);
+        }
+        return $this->render('admin/index.html.twig', [
+            'controller_name' => 'AdminController',
+            'me' => $userInfo,
+            'pagination' => $pagination,
+            'count' => count($count),
+            'faster' => true,
         ]);
     }
 }

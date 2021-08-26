@@ -3,6 +3,10 @@
 {% block title %}Log in!{% endblock %}
 
 {% block body %}
+<div class='containefr'>
+			<div class='row'>
+				<div class='box-a' style="width: 51%;">
+					<div class='form' style="width: 69%;">
 <form method="post">
     {% if error %}
         <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
@@ -39,4 +43,9 @@
         Sign in
     </button>
 </form>
+</div>
+					</div>
+				</div>
+			</div>
+		</div>
 {% endblock %}

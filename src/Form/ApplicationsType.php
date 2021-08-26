@@ -27,6 +27,7 @@ class ApplicationsType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
+            'compound'   => false,
             'data_class' => Applications::class,
         ]);
     }

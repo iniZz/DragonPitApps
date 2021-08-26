@@ -31,6 +31,13 @@ class SecurityController extends AbstractController
      */
     public function logout()
     {
-        throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
+        dd();
+        $response = new Response();
+        $response->headers->clearCookie('iniZAuth');
+
+        $response->headers->set('Content-Type', 'text/html');
+        $response->send();
+        
+        return $this->redirectToRoute('index');
     }
 }

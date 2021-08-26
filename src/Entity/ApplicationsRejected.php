@@ -2,13 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\ApplicationsRepository;
+use App\Repository\ApplicationsRejectedRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=ApplicationsRepository::class)
+ * @ORM\Entity(repositoryClass=ApplicationsRejectedRepository::class)
  */
-class Applications
+class ApplicationsRejected
 {
     /**
      * @ORM\Id
@@ -106,16 +106,6 @@ class Applications
      * @ORM\Column(type="text", nullable=true)
      */
     private $reason;
-
-    /**
-     * @ORM\Column(type="date", nullable=true)
-     */
-    private $createTime;
-
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     */
-    private $fasterBuyTime;
 
     public function getId(): ?int
     {
@@ -257,7 +247,7 @@ class Applications
 
         return $this;
     }
-
+    
     public function getQue5(): ?string
     {
         return $this->que5;
@@ -281,7 +271,7 @@ class Applications
 
         return $this;
     }
-
+    
     public function getQue6(): ?string
     {
         return $this->que6;
@@ -329,7 +319,7 @@ class Applications
 
         return $this;
     }
-    public function getReason()
+    public function getReason(): ?string
     {
         return $this->reason;
     }
@@ -337,30 +327,6 @@ class Applications
     public function setReason(string $reason): self
     {
         $this->reason = $reason;
-
-        return $this;
-    }
-
-    public function getCreateTime(): ?\DateTimeInterface
-    {
-        return $this->createTime;
-    }
-
-    public function setCreateTime(\DateTimeInterface $createTime): self
-    {
-        $this->createTime = $createTime;
-
-        return $this;
-    }
-
-    public function getFasterBuyTime(): ?\DateTimeInterface
-    {
-        return $this->fasterBuyTime;
-    }
-
-    public function setFasterBuyTime(\DateTimeInterface $fasterBuyTime): self
-    {
-        $this->fasterBuyTime = $fasterBuyTime;
 
         return $this;
     }

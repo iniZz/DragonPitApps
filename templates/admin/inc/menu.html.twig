@@ -10,13 +10,13 @@
 	<nav class="page__menu menu">
     <ul class="menu__list r-list">
       <li class="menu__group"><a href="{{ path('admin') }}" class="menu__link r-link text-underlined">Podania</a></li>
-      <li class="menu__group"><a href="{{ path('index') }}" class="menu__link r-link text-underlined">Przyśpieszona<span class="red-count">{{ count }}</span></a></li>
+      <li class="menu__group"><a href="{{ path('przyspieszona') }}" class="menu__link r-link text-underlined">Przyśpieszona<span class="red-count">{{ count }}</span></a></li>
       {# <li class="menu__group"><a href="{{ path('myApplications') }}" class="menu__link r-link text-underlined">Moje Podania</a></li> #}
       {% if is_granted('ROLE_SUPER_ADMIN') %}
    
       <li class="menu__group"><a href="{{ path('change_questions') }}" class="menu__link r-link text-underlined">Pytania</a></li>
 {% endif %}
-      <li class="menu__group"><a href="{{ path('app_logout') }}" class=""><img src='https://cdn.discordapp.com/avatars/{{ me.id }}/{{ me.avatar }}.png' alt='{{ me.username }}' /></a></li>
+      <li class="menu__group"><a href="{{ path('user_app_logout') }}" class=""><img src='https://cdn.discordapp.com/avatars/{{ me.id }}/{{ me.avatar }}.png' alt='{{ me.username }}' /></a></li>
     </ul>
   </nav>
 </header>

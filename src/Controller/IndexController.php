@@ -29,6 +29,8 @@ use Symfony\Component\HttpFoundation\Cookie;
 class IndexController extends AbstractController
 {
     private const DISCORD_ENDPOINT = 'https://discord.com/api/oauth2/authorize';
+    private const ATLANTIS_ENDPOINT = 'https://atlantisrp.gg';
+    private const ATLANTIS_DISCORD_ENDPOINT = 'https://discord.atlantisrp.gg';
 
     private $discord;
     private $applicationsService;
@@ -45,7 +47,6 @@ class IndexController extends AbstractController
     public function index(Request $request): Response
     {
         $cookie = $request->cookies->get('iniZAuth');
-        // dd($cookie);
         if ($cookie) {
             $userInfo = $this->discord->getUser($cookie);
             $questions = $this->getDoctrine()
@@ -53,7 +54,6 @@ class IndexController extends AbstractController
             ->find(1);
             $applications = new Applications();
             $applications->setDiscordId($userInfo['username'].' ('.$userInfo['id'].')');
-            // $applications->setBirthDate(date("yyyy-MM-dd"));
             
             $form = $this->createFormBuilder($applications, array('attr' => array('class' => 'input-container')))
             ->setAttribute('class', 'input-container')
@@ -67,13 +67,28 @@ class IndexController extends AbstractController
             ->add('answ5', TextareaType::class, ['label' => $questions->getQue5()])
             ->add('answ6', TextareaType::class, ['label' => $questions->getQue6()])
             ->add('save', SubmitType::class, ['label' => 'Wyślij'])
-            ->add('add', SubmitType::class, ['label' => 'Wyślij'])
+            ->add('add', SubmitType::class, ['label' => 'Zapisz jako wersję roboczą', 'attr' => array('class' => 'btn_half')])
             ->getForm();
 
             $form->handleRequest($request);
             if ($form->isSubmitted() && $form->isValid()) {
-                $applications->setStatus("wait");
-                $this->applicationsService->Insert($applications, $questions);
+                $isBL = $this->applicationsService->getBL($userInfo['id']);
+                if ($isBL) {
+                    return $this->redirectToRoute('user_app_logout');
+                    // return $this->redire
+                }else {
+                    if ($form->getClickedButton() && 'save' === $form->getClickedButton()->getName()) {
+                        $applications->setStatus("wait");
+                        $applications->setFaster(false);
+                        $applications->setCreateTime(new \DateTime());
+                        $applications->setFasterBuyTime(new \DateTime());
+                        $this->applicationsService->Insert($applications, $questions);
+                    } elseif ($form->getClickedButton() && 'add' === $form->getClickedButton()->getName()) {
+                        $applications->setStatus("wait");
+                        $this->applicationsService->toDo($applications, $questions);
+                    }
+                
+                }
             }
 
             return $this->render('index/application/index.html.twig', [
@@ -86,7 +101,6 @@ class IndexController extends AbstractController
                 'me' => $userInfo,
             ]);
         }
-        // dd($cookie);
     }
 
     /**
@@ -135,7 +149,7 @@ class IndexController extends AbstractController
     }
 
     /**
-     * @Route("/logout", name="app_logout",
+     * @Route("/logout", name="user_app_logout",
      * methods={"GET"})
      */
     public function appLogout(Request $request, UrlGeneratorInterface $urlGenerator): Response
@@ -173,5 +187,22 @@ class IndexController extends AbstractController
             'me' => $userInfo,
         ]);
         }
+    }
+
+    /**
+     * @Route("/atlantis", name="atlantis",
+     * methods={"GET"})
+     */
+    public function atlantis(): Response
+    {
+        return new RedirectResponse(self::ATLANTIS_ENDPOINT);
+    }
+    /**
+     * @Route("/discord", name="discord",
+     * methods={"GET"})
+     */
+    public function atlantisdiscord(): Response
+    {
+        return new RedirectResponse(self::ATLANTIS_DISCORD_ENDPOINT);
     }
 }
