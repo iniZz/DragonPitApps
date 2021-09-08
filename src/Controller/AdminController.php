@@ -92,6 +92,8 @@ class AdminController extends AbstractController
                 ->getForm();
                 }else {
                     $application->setReason("...");
+
+                    
                     
                     $form = $this->createFormBuilder($application, array('attr' => array('class' => 'input-container')))
                     ->setAttribute('class', 'input-container')
