@@ -89,4 +89,11 @@ class ApplicationsService
         // dd($user);
         return $user;
     }
+
+    public function CheckStatus($discord)
+    {
+        $user = $this->appsRepository->findOneBy(array('discordId' => $discord));
+        
+        return $user;
+    }
 }

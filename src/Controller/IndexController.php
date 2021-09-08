@@ -91,6 +91,15 @@ class IndexController extends AbstractController
                 }
             }
 
+            if($this->applicationsService->CheckStatus($userInfo['username'].' ('.$userInfo['id'].')')){
+                return $this->render('index/application/message.html.twig', [
+                    'me' => $userInfo,
+                    'message' => 'Twoje podanie już zostało wysłane i oczekuje na rozpatrzenie. W momencie pozytywnego bądź negatywnego rozpatrzenia podania zostaniesz poinformowany przez naszego Przewodnika. Pamiętaj, że otrzymasz wiadomość o tym tylko w momencie gdy jesteś na naszym serwerze discord.',
+                ]);
+            }else {
+                
+            }
+
             return $this->render('index/application/index.html.twig', [
                 'me' => $userInfo,
                 'form' => $form->createView(),
